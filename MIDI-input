@@ -1,0 +1,41 @@
+<script>
+    let midiAccess;
+
+    if (navigator.requestMIDIAccess) {
+        navigator.requestMIDIAccess()
+            .then(onMIDISuccess, onMIDIFailure);
+    } else {
+        console.log("MIDI is not supported in this browser.");
+    }
+
+    function onMIDISuccess(midi) {
+        midiAccess = midi;
+        const inputs = midiAccess.inputs.values();
+        for (let input of inputs) {
+            input.onmidimessage = handleMIDIMessage;
+        }
+    }
+
+    function onMIDIFailure() {
+        console.log("Failed to get MIDI access.");
+    }
+
+    function handleMIDIMessage(message) {
+        const data = message.data;
+        const command = data[0];
+        const note = data[1];
+
+        // Example of handling MIDI note input
+        if (command === 144) { // Note on
+            const frequency = midiNoteToFrequency(note);
+            console.log("MIDI Note ON: ", note, "Frequency:", frequency);
+            // Convert to color using sound-to-color logic
+            // Update the color timeline accordingly
+        }
+    }
+
+    function midiNoteToFrequency(note) {
+        const A440 = 440;
+        return A440 * Math.pow(2, (note - 69) / 12);
+    }
+</script>
