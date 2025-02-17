@@ -1,0 +1,78 @@
+<style>
+    body {
+        text-align: center;
+        font-family: Arial, sans-serif;
+        overflow-x: auto;
+        margin: 0;
+    }
+    #colorDisplay {
+        width: 100%;
+        height: 100px;
+        background: black;
+        transition: background 0.1s;
+    }
+    #colorTimeline {
+        width: 2000px; /* Start with a larger canvas width */
+        height: 50px;
+        display: block;
+        border: 1px solid black;
+        position: relative;
+    }
+    button, input {
+        margin: 10px;
+        padding: 10px;
+        font-size: 16px;
+    }
+    .scroll-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+</style>
+
+<body>
+    <h1>Sound-to-Color Timeline</h1>
+    <button onclick="startMicrophone()">Start Microphone</button>
+    <button id="pauseButton" onclick="togglePause()">Pause</button>
+    <button onclick="exportTimeline()">Export Timeline as PNG</button>
+    <button onclick="exportHSL()">Export HSL Data</button>
+    <input type="file" id="audioFile" accept="audio/*" onchange="processFile()">
+    <div id="colorDisplay"></div>
+    <div class="scroll-wrapper">
+        <canvas id="colorTimeline"></canvas>
+    </div>
+
+    <script>
+        // Setup and functions as before...
+        let timelineScale = 1; // Timeline zoom scale
+
+        function drawTimeline() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let interval = Math.floor(canvas.width / (colorHistory.length / timelineScale));
+            for (let i = 0; i < colorHistory.length; i++) {
+                ctx.fillStyle = colorHistory[i];
+                ctx.fillRect(i * timelineScale, 0, 1, canvas.height);
+            }
+            ctx.fillStyle = "black";
+            ctx.font = "12px Arial";
+            ctx.textAlign = "left";
+            ctx.fillText("Time (s)", 5, canvas.height - 5);
+            let max = hslData.length;
+            for (let i = 0; i <= 5; i++) {
+                let timeLabel = hslData[Math.floor((i / 5) * max)]?.time || "0.00";
+                ctx.fillText(timeLabel, (i * canvas.width / 5) * timelineScale, canvas.height - 5);
+            }
+        }
+
+        // Zooming function on mousewheel scroll
+        canvas.addEventListener('wheel', function(event) {
+            if (event.deltaY < 0) {
+                timelineScale = Math.min(timelineScale * 1.1, 10); // Zoom in
+            } else {
+                timelineScale = Math.max(timelineScale / 1.1, 0.5); // Zoom out
+            }
+            drawTimeline();
+            event.preventDefault();
+        });
+    </script>
+</body>
